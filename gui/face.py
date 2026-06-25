@@ -54,7 +54,17 @@ class RobotFace:
         
         self.console = tk.Text(self.inner_frame, height=6, bg='#14213d', fg='#00e5ff', font=("Consolas", 9), bd=0, padx=10, pady=10)
         self.console.pack(fill=tk.BOTH, expand=True)
-        self.console.insert(tk.END, "Welcome user, R.O.O.T. system online.\nType /help to see all available commands.\n----------------------------------------\n")
+        
+        # Configure syntax highlighting tags for logs
+        self.console.tag_config("timestamp", foreground="#556677", font=("Consolas", 8))
+        self.console.tag_config("error", foreground="#ff003c", font=("Consolas", 9, "bold"))
+        self.console.tag_config("exec", foreground="#00ff66", font=("Consolas", 9))
+        self.console.tag_config("info", foreground="#00e5ff", font=("Consolas", 9))
+        self.console.tag_config("system", foreground="#ffbb00", font=("Consolas", 9, "italic"))
+        
+        self.console.insert(tk.END, "Welcome user, R.O.O.T. system online.\nType /help to see all available commands.\n", "system")
+        self.console.insert(tk.END, "-"*40 + "\n", "timestamp")
+        self.console.config(state=tk.DISABLED)
         
         # Subtle glowing separator line
         self.separator = tk.Frame(self.inner_frame, bg='#00e5ff', height=1)
@@ -290,8 +300,23 @@ class RobotFace:
                 self.canvas.create_line(bx, my - bar_h, bx, my + bar_h, fill=color, width=6, capstyle=tk.ROUND, tags="face")
             
         if log_text.strip() != "" and log_text != getattr(self, "last_log", ""):
-            # Append to the terminal instead of replacing it
-            self.console.insert(tk.END, f"{log_text}\n")
+            import datetime
+            ts = datetime.datetime.now().strftime("[%H:%M:%S] ")
+            
+            self.console.config(state=tk.NORMAL)
+            self.console.insert(tk.END, ts, "timestamp")
+            
+            # Syntax highlighting logic
+            log_lower = log_text.lower()
+            if "error" in log_lower or "fail" in log_lower or "damage" in log_lower:
+                self.console.insert(tk.END, f"{log_text}\n", "error")
+            elif "executing:" in log_lower or "patch" in log_lower:
+                self.console.insert(tk.END, f"{log_text}\n", "exec")
+            elif "system" in log_lower or "initializing" in log_lower:
+                self.console.insert(tk.END, f"{log_text}\n", "system")
+            else:
+                self.console.insert(tk.END, f"{log_text}\n", "info")
+                
             self.console.see(tk.END)
             self.last_log = log_text
             
@@ -299,6 +324,7 @@ class RobotFace:
             lines = self.console.get('1.0', tk.END).split('\n')
             if len(lines) > 50:
                 self.console.delete('1.0', f"{len(lines)-50}.0")
+            self.console.config(state=tk.DISABLED)
         
         self.root.after(30, self.update_gui)
 

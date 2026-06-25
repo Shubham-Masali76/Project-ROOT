@@ -22,7 +22,8 @@ def listen_loop():
     
     if not os.path.exists("model"):
         print("[Ear Error] Vosk model not found. Please download it using download_model.py")
-        sys.exit(1)
+        # Gracefully exit the thread instead of throwing a fatal process exit
+        return
 
     model = vosk.Model("model")
     samplerate = 16000
