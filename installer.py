@@ -104,7 +104,14 @@ def start_install(api_key, create_desktop, create_startup, progress_var, status_
             # 9. First Launch
             pythonw_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pythonw.exe")
             main_py = os.path.join(INSTALL_DIR, "main.py")
-            subprocess.Popen([pythonw_exe, main_py], cwd=INSTALL_DIR, creationflags=subprocess.CREATE_NO_WINDOW)
+            
+            # CRITICAL FIX: Strip PyInstaller's temporary Tkinter paths from the environment
+            # otherwise the child process will look for libraries in a folder that gets deleted!
+            clean_env = os.environ.copy()
+            clean_env.pop("TCL_LIBRARY", None)
+            clean_env.pop("TK_LIBRARY", None)
+            
+            subprocess.Popen([pythonw_exe, main_py], cwd=INSTALL_DIR, env=clean_env, creationflags=subprocess.CREATE_NO_WINDOW)
             
             # Close the installer
             root.after(2000, root.destroy)
