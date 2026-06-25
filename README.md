@@ -26,7 +26,13 @@ R.O.O.T. possesses a brain-inspired memory architecture to prevent catastrophic 
 ### 3. Over-The-Air Auto-Updates
 R.O.O.T. stays fresh automatically. On boot, the `auto_updater.py` module silently pings this repository. If a new commit is detected, R.O.O.T. downloads the fresh codebase, safely overwrites its internal logic (while protecting your API keys and memories), and restarts.
 
-### 4. 14 Independent Action Operators
+### 4. Interactive Holographic Interface
+R.O.O.T. features a custom-built frameless GUI (`gui/face.py`) that floats above your desktop. 
+- **Voice or Text:** Speak naturally to the AI, or type commands into the built-in terminal.
+- **Stealth Controls:** Double-click the robot face to collapse the terminal. Right-click to pin it to the top of your screen. 
+- **Privacy First:** The microphone is muted by default and can be toggled instantly via the `/mic` command.
+
+### 5. 14 Independent Action Operators
 R.O.O.T. features a specialized execution queue capable of handling advanced OS-level commands natively:
 - **OS Controller:** Manage windows, processes, and applications.
 - **Visionary:** Screen analysis and GUI interaction.
