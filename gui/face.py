@@ -155,6 +155,7 @@ class RobotFace:
         self._start_y = event.y_root
         self._start_w = self.root.winfo_width()
         self._start_h = self.root.winfo_height()
+        return "break"
 
     def do_resize(self, event):
         deltax = event.x_root - self._start_x
@@ -162,6 +163,7 @@ class RobotFace:
         new_w = max(320, self._start_w + deltax)
         new_h = max(220, self._start_h + deltay)
         self.root.geometry(f"{new_w}x{new_h}")
+        return "break"
         
     def toggle_terminal(self, event=None):
         x = self.root.winfo_x()
