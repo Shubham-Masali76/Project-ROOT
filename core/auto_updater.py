@@ -25,6 +25,7 @@ def update_thread():
         print("[AutoUpdater] GitHub Username not configured. Skipping auto-update.")
         return
         
+    time.sleep(3) # Wait a few seconds so the user can read the welcome message first
     STATE_DICT["CURRENT_LOG"] = "AutoUpdater: Ping sent to GitHub for OTA updates..."
     print("[AutoUpdater] Checking for OTA updates...")
     try:

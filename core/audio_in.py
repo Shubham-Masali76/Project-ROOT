@@ -40,9 +40,8 @@ def listen_loop():
         q.put(bytes(indata))
         
     STATE_DICT["EMOTION"] = "HAPPY"
-    STATE_DICT["CURRENT_LOG"] = "Welcome User. All systems online."
-    speak("Welcome User. All systems online. True Wake Word Engine engaged.")
-    time.sleep(4) # Allow the welcome message to be displayed for 4 seconds
+    speak("Welcome User. All systems online.")
+    time.sleep(2)
     
     import pyaudio
     p = pyaudio.PyAudio()

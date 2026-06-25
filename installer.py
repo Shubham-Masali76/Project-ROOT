@@ -14,7 +14,7 @@ GITHUB_ZIP_URL = "https://github.com/Shubham-Masali76/Project-Root/archive/refs/
 INSTALL_DIR = os.path.join(os.environ["USERPROFILE"], "ROOT_AI")
 # ---------------------
 
-def start_install(api_key, progress_var, status_label, root):
+def start_install(api_key, create_desktop, create_startup, progress_var, status_label, root):
     if not api_key:
         messagebox.showerror("Error", "API Key is required to power the AI's brain.")
         return
@@ -67,24 +67,31 @@ def start_install(api_key, progress_var, status_label, root):
             progress_var.set(90)
             
             # 7. Generate VBS AutoStart
-            status_label.config(text="Injecting into Windows Startup...")
-            vbs_path = os.path.join(os.environ["APPDATA"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "ROOT_AutoStart.vbs")
-            pythonw_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pythonw.exe")
-            main_py = os.path.join(INSTALL_DIR, "main.py")
-            
-            vbs_content = f'Set WshShell = CreateObject("WScript.Shell")\nWshShell.CurrentDirectory = "{INSTALL_DIR}"\nWshShell.Run """{pythonw_exe}"" ""{main_py}""", 0, False\n'
-            with open(vbs_path, "w") as f:
-                f.write(vbs_content)
+            if create_startup:
+                status_label.config(text="Injecting into Windows Startup...")
+                vbs_path = os.path.join(os.environ["APPDATA"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "ROOT_AutoStart.vbs")
+                pythonw_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pythonw.exe")
+                main_py = os.path.join(INSTALL_DIR, "main.py")
+                
+                vbs_content = f'Set WshShell = CreateObject("WScript.Shell")\nWshShell.CurrentDirectory = "{INSTALL_DIR}"\nWshShell.Run """{pythonw_exe}"" ""{main_py}""", 0, False\n'
+                with open(vbs_path, "w") as f:
+                    f.write(vbs_content)
                 
             # 8. Create Desktop Shortcut
-            bat_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "Start R.O.O.T..bat")
-            bat_content = f"""@echo off\ncd /d "{INSTALL_DIR}"\nstart "" "{pythonw_exe}" "{main_py}"\n"""
-            with open(bat_path, "w") as f:
-                f.write(bat_content)
+            if create_desktop:
+                pythonw_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pythonw.exe")
+                main_py = os.path.join(INSTALL_DIR, "main.py")
+                bat_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "Start R.O.O.T..bat")
+                bat_content = f"""@echo off\ncd /d "{INSTALL_DIR}"\nstart "" "{pythonw_exe}" "{main_py}"\n"""
+                with open(bat_path, "w") as f:
+                    f.write(bat_content)
+                    
             progress_var.set(100)
             status_label.config(text="Installation Complete! Waking R.O.O.T. up...")
             
             # 9. First Launch
+            pythonw_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pythonw.exe")
+            main_py = os.path.join(INSTALL_DIR, "main.py")
             subprocess.Popen([pythonw_exe, main_py], cwd=INSTALL_DIR, creationflags=subprocess.CREATE_NO_WINDOW)
             
             # Close the installer
@@ -100,7 +107,7 @@ def start_install(api_key, progress_var, status_label, root):
 def build_gui():
     root = tk.Tk()
     root.title("R.O.O.T. OS Installer")
-    root.geometry("550x400")
+    root.geometry("550x450")
     root.configure(bg="#121212")
     
     title = tk.Label(root, text="Install R.O.O.T. AI", font=("Segoe UI", 20, "bold"), bg="#121212", fg="#00e5ff")
@@ -124,7 +131,19 @@ def build_gui():
                          bg="#121212", fg="#00e5ff", font=("Segoe UI", 9, "underline"), 
                          activebackground="#121212", activeforeground="white",
                          relief=tk.FLAT, cursor="hand2", command=open_api_page)
-    help_btn.pack(pady=(0, 10))
+    help_btn.pack(pady=(0, 5))
+    
+    # Transparency Checkboxes
+    desktop_var = tk.BooleanVar(value=True)
+    startup_var = tk.BooleanVar(value=True)
+    
+    chk_frame = tk.Frame(root, bg="#121212")
+    chk_frame.pack(pady=5)
+    
+    tk.Checkbutton(chk_frame, text="Create Desktop Shortcut", variable=desktop_var, bg="#121212", fg="#00e5ff", 
+                   selectcolor="#1e1e1e", activebackground="#121212", activeforeground="white", font=("Segoe UI", 9)).pack(anchor=tk.W)
+    tk.Checkbutton(chk_frame, text="Launch automatically on Windows Startup", variable=startup_var, bg="#121212", fg="#00e5ff", 
+                   selectcolor="#1e1e1e", activebackground="#121212", activeforeground="white", font=("Segoe UI", 9)).pack(anchor=tk.W)
     
     progress_var = tk.DoubleVar()
     style = ttk.Style()
@@ -139,7 +158,7 @@ def build_gui():
     
     btn = tk.Button(root, text="Install & Launch", bg="#00e5ff", fg="black", font=("Segoe UI", 12, "bold"), 
                     activebackground="#00b3cc", relief=tk.FLAT, cursor="hand2",
-                    command=lambda: start_install(key_entry.get().strip(), progress_var, status_label, root))
+                    command=lambda: start_install(key_entry.get().strip(), desktop_var.get(), startup_var.get(), progress_var, status_label, root))
     btn.pack(pady=20, ipadx=20, ipady=5)
     
     root.mainloop()

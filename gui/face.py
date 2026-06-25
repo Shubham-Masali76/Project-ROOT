@@ -11,7 +11,10 @@ class RobotFace:
         self.root.wm_attributes("-topmost", True)
         # Distinct background color so it doesn't blend into other apps
         self.bg_color = '#0a1128' # Deep Rich Navy Blue instead of black/grey
+        self.bg_color = '#0a1128' # Deep Rich Navy Blue instead of black/grey
         self.root.configure(bg=self.bg_color)
+        
+        self.is_pinned = True
         
         # Add Drag-to-Move functionality
         self.root.bind("<ButtonPress-1>", self.start_move)
@@ -32,6 +35,16 @@ class RobotFace:
         self.canvas.bind("<ButtonPress-1>", self.start_move)
         self.canvas.bind("<B1-Motion>", self.do_move)
         
+        # Bind double-click to collapse terminal
+        self.canvas.bind("<Double-Button-1>", self.toggle_terminal)
+        
+        # Right-click context menu
+        self.menu = tk.Menu(self.root, tearoff=0, bg='#14213d', fg='#00e5ff', activebackground='#00e5ff', activeforeground='black', font=("Segoe UI", 10))
+        self.menu.add_command(label="Unpin from Top", command=self.toggle_pin)
+        self.menu.add_separator()
+        self.menu.add_command(label="Exit R.O.O.T.", command=self.trigger_shutdown)
+        self.canvas.bind("<Button-3>", self.show_menu)
+        
         # Single seamless terminal frame with glowing border
         self.terminal_frame = tk.Frame(self.root, bg='#00e5ff', bd=1)
         self.terminal_frame.pack(padx=10, pady=(0, 10), fill=tk.BOTH, expand=True)
@@ -41,6 +54,7 @@ class RobotFace:
         
         self.console = tk.Text(self.inner_frame, height=6, bg='#14213d', fg='#00e5ff', font=("Consolas", 9), bd=0, padx=10, pady=10)
         self.console.pack(fill=tk.BOTH, expand=True)
+        self.console.insert(tk.END, "Welcome user, R.O.O.T. system online.\nType /help to see all available commands.\n----------------------------------------\n")
         
         # Subtle glowing separator line
         self.separator = tk.Frame(self.inner_frame, bg='#00e5ff', height=1)
@@ -56,6 +70,12 @@ class RobotFace:
         self.entry = tk.Entry(self.entry_row, bg='#14213d', fg='white', font=("Consolas", 10), bd=0, insertbackground='#00e5ff')
         self.entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, ipady=3)
         self.entry.bind("<Return>", self.on_enter)
+        
+        # Custom Resize Grip for Frameless Window
+        self.grip = tk.Label(self.entry_row, text="◢", bg='#14213d', fg='#00e5ff', cursor="size_nw_se", font=("Consolas", 10))
+        self.grip.pack(side=tk.RIGHT, anchor=tk.SE)
+        self.grip.bind("<ButtonPress-1>", self.start_resize)
+        self.grip.bind("<B1-Motion>", self.do_resize)
         
         self.last_log = ""
         self.update_gui()
@@ -124,7 +144,43 @@ class RobotFace:
         deltay = event.y - self._y
         x = self.root.winfo_x() + deltax
         y = self.root.winfo_y() + deltay
-        self.root.geometry(f"+{x}+{y}")
+        
+        # Keep current width and height to prevent jumping when dragged
+        w = self.root.winfo_width()
+        h = self.root.winfo_height()
+        self.root.geometry(f"{w}x{h}+{x}+{y}")
+        
+    def start_resize(self, event):
+        self._start_x = event.x_root
+        self._start_y = event.y_root
+        self._start_w = self.root.winfo_width()
+        self._start_h = self.root.winfo_height()
+
+    def do_resize(self, event):
+        deltax = event.x_root - self._start_x
+        deltay = event.y_root - self._start_y
+        new_w = max(320, self._start_w + deltax)
+        new_h = max(220, self._start_h + deltay)
+        self.root.geometry(f"{new_w}x{new_h}")
+        
+    def toggle_terminal(self, event=None):
+        x = self.root.winfo_x()
+        y = self.root.winfo_y()
+        if self.terminal_frame.winfo_ismapped():
+            self.terminal_frame.pack_forget()
+            self.root.geometry(f"320x220+{x}+{y}")
+        else:
+            self.terminal_frame.pack(padx=10, pady=(0, 10), fill=tk.BOTH, expand=True)
+            self.root.geometry(f"320x450+{x}+{y}")
+            
+    def toggle_pin(self):
+        self.is_pinned = not self.is_pinned
+        self.root.wm_attributes("-topmost", self.is_pinned)
+        new_label = "Unpin from Top" if self.is_pinned else "Pin to Top"
+        self.menu.entryconfig(0, label=new_label)
+        
+    def show_menu(self, event):
+        self.menu.post(event.x_root, event.y_root)
                 
     def draw_glow_line(self, x1, y1, x2, y2, base_color):
         """Draws a neon glowing line"""

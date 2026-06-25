@@ -18,4 +18,4 @@ GUI_LOCK = threading.Lock()
 
 # Configuration Flags
 SILENT_MODE = False
-MIC_ACTIVE = True
+MIC_ACTIVE = False
