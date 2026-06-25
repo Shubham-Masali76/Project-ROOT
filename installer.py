@@ -114,7 +114,7 @@ def build_gui():
     title.pack(pady=(30, 10))
     
     desc_text = (
-        "Welcome to R.O.O.T. (Realtime Omni-Operational Terminal).\n\n"
+        "Welcome to R.O.O.T. (Reactive Operational Orchestration Technology).\n\n"
         "This assistant runs entirely locally on your machine for maximum privacy.\n"
         "To power its deep-learning brain, please provide your Gemini API Key below."
     )
