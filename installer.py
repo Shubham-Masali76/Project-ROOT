@@ -46,12 +46,24 @@ def start_install(api_key, create_desktop, create_startup, progress_var, status_
             os.remove(zip_path)
             
             # Move files from extracted subfolder to root install dir
-            # Github zips extract into a folder named like "RepoName-main"
-            extracted_folders = [f for f in os.listdir(INSTALL_DIR) if os.path.isdir(os.path.join(INSTALL_DIR, f))]
-            extracted_folder = os.path.join(INSTALL_DIR, extracted_folders[0])
-            for item in os.listdir(extracted_folder):
-                shutil.move(os.path.join(extracted_folder, item), INSTALL_DIR)
-            os.rmdir(extracted_folder)
+            extracted_folder = None
+            for d in os.listdir(INSTALL_DIR):
+                full_path = os.path.join(INSTALL_DIR, d)
+                if os.path.isdir(full_path) and ("Project-Root" in d or "Project-ROOT" in d):
+                    extracted_folder = full_path
+                    break
+                    
+            if extracted_folder:
+                for item in os.listdir(extracted_folder):
+                    src = os.path.join(extracted_folder, item)
+                    dst = os.path.join(INSTALL_DIR, item)
+                    if os.path.exists(dst):
+                        if os.path.isdir(dst):
+                            shutil.rmtree(dst, ignore_errors=True)
+                        else:
+                            os.remove(dst)
+                    shutil.move(src, INSTALL_DIR)
+                shutil.rmtree(extracted_folder, ignore_errors=True)
             progress_var.set(50)
             
             # 5. Build venv
