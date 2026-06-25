@@ -136,6 +136,18 @@ def build_gui():
     key_entry = tk.Entry(root, width=55, show="*", font=("Segoe UI", 11), bg="#1e1e1e", fg="white", insertbackground="white", relief=tk.FLAT)
     key_entry.pack(pady=10, ipady=5)
     
+    # Auto-fill API key if .env already exists
+    env_path = os.path.join(INSTALL_DIR, ".env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r") as f:
+                for line in f:
+                    if line.startswith("GEMINI_API_KEY="):
+                        key_entry.insert(0, line.split("=", 1)[1].strip())
+                        break
+        except Exception:
+            pass
+
     def open_api_page():
         webbrowser.open("https://aistudio.google.com/app/apikey")
         
