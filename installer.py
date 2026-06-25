@@ -76,6 +76,27 @@ def start_install(api_key, create_desktop, create_startup, progress_var, status_
             pip_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pip.exe")
             req_file = os.path.join(INSTALL_DIR, "requirements.txt")
             subprocess.run([pip_exe, "install", "-r", req_file], cwd=INSTALL_DIR, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            progress_var.set(80)
+            
+            # 6.5 Download Vosk Offline Voice Model
+            status_label.config(text="Downloading Ear Cortex (Offline Voice Model)...")
+            model_dir = os.path.join(INSTALL_DIR, "model")
+            if not os.path.exists(model_dir):
+                vosk_url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
+                vosk_zip = os.path.join(INSTALL_DIR, "vosk_model.zip")
+                urllib.request.urlretrieve(vosk_url, vosk_zip)
+                
+                with zipfile.ZipFile(vosk_zip, 'r') as zip_ref:
+                    zip_ref.extractall(INSTALL_DIR)
+                os.remove(vosk_zip)
+                
+                # Find the extracted folder and rename it to 'model'
+                for d in os.listdir(INSTALL_DIR):
+                    full_path = os.path.join(INSTALL_DIR, d)
+                    if os.path.isdir(full_path) and "vosk-model" in d:
+                        os.rename(full_path, model_dir)
+                        break
+            
             progress_var.set(90)
             
             # 7. Generate VBS AutoStart
