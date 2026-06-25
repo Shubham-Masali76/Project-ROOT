@@ -14,14 +14,19 @@ HELP_TEXT = """
           R.O.O.T. SYSTEM TERMINAL
 ================================================
 Available Terminal Commands:
-  /silent   - Mute Text-to-Speech (stealth mode)
-  /voice    - Restore Text-to-Speech
-  /mic off  - Mute the microphone (stop listening)
-  /mic on   - Unmute the microphone
-  /help     - Show this menu
-  /exit     - Shut down all systems
+  /silent   - Disables the AI's spoken voice. R.O.O.T. will only communicate via text.
+  /voice    - Re-enables the AI's spoken voice (Text-to-Speech).
+  /mic off  - Disables the microphone. R.O.O.T. will stop listening to your room.
+  /mic on   - Enables the microphone so you can issue voice commands.
+  /help     - Displays this detailed list of available commands.
+  /exit     - Safely shuts down the AI and all background processes.
+
+Hidden UI Controls:
+  - Double-Click Face : Shrinks the window to hide the terminal.
+  - Right-Click Face  : Opens a menu to Pin/Unpin the AI from the top of the screen.
+  - Drag Bottom Right : Click the (◢) icon to resize the terminal window.
 ================================================
-Type a command or speak to the microphone...
+Type a command below or type '/mic on' to speak...
 """
 
 def keyboard_worker():
@@ -63,5 +68,7 @@ def keyboard_worker():
                     threading.Timer(delay, execution_queue.put, args=[clean_command]).start()
                 else:
                     execution_queue.put(command)
-        except EOFError:
+        except (EOFError, RuntimeError):
+            # If there is no terminal attached (e.g. running in background or via pythonw),
+            # the keyboard worker cleanly exits without crashing the system.
             break
