@@ -3,6 +3,29 @@ import os
 import sys
 import threading
 import re
+import io # Import the io module for TextIOWrapper
+
+# Auto-Healing Protocol: UnicodeEncodeError Mitigation
+# This block ensures that the console output stream (sys.stdout and sys.stderr)
+# uses UTF-8 encoding. This is crucial on Windows systems where the default
+# console encoding (e.g., cp1252) might not support all Unicode characters
+# present in the HELP_TEXT, leading to a UnicodeEncodeError.
+if sys.stdout.encoding != 'utf-8' and sys.stdout.isatty():
+    try:
+        # Re-wrap sys.stdout and sys.stderr with a UTF-8 TextIOWrapper
+        # write_through=True ensures that writes are flushed immediately to the underlying buffer,
+        # which is typical and desired behavior for console output.
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', write_through=True)
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', write_through=True)
+    except AttributeError:
+        # This can happen if sys.stdout.buffer is not available (e.g., in some IDEs,
+        # or if stdout is already a TextIOWrapper). In such cases, the environment
+        # might already handle Unicode correctly, or the output is redirected.
+        pass
+    except Exception as e:
+        # Catch any other potential exceptions during the re-configuration
+        print(f"Warning: R.O.O.T. could not reconfigure console for UTF-8 output. Some characters might display incorrectly. Error: {e}", file=sys.stderr)
+
 
 import core.state
 from core.state import execution_queue, STATE_DICT
@@ -24,7 +47,7 @@ Available Terminal Commands:
 Hidden UI Controls:
   - Double-Click Face : Shrinks the window to hide the terminal.
   - Right-Click Face  : Opens a menu to Pin/Unpin the AI from the top of the screen.
-  - Drag Bottom Right : Click the (◢) icon to resize the terminal window.
+  - Drag Bottom Right : Click the Resize Grip in the bottom right corner to resize the terminal window.
 ================================================
 Type a command below or type '/mic on' to speak...
 """

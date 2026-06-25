@@ -10,21 +10,34 @@ import io # Import the io module for TextIOWrapper
 # uses UTF-8 encoding. This is crucial on Windows systems where the default
 # console encoding (e.g., cp1252) might not support all Unicode characters
 # present in the HELP_TEXT, leading to a UnicodeEncodeError.
-if sys.stdout.encoding != 'utf-8' and sys.stdout.isatty():
+
+# Fix: Added 'sys.stdout is not None' check to prevent AttributeError if stdout is somehow unset.
+# This can happen in environments where standard streams are not fully initialized (e.g., some IDEs, background services).
+if sys.stdout is not None and sys.stdout.encoding != 'utf-8' and sys.stdout.isatty():
     try:
-        # Re-wrap sys.stdout and sys.stderr with a UTF-8 TextIOWrapper
-        # write_through=True ensures that writes are flushed immediately to the underlying buffer,
-        # which is typical and desired behavior for console output.
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', write_through=True)
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', write_through=True)
+        # Ensure sys.stderr is also not None and both have a '.buffer' before attempting to re-wrap.
+        if sys.stderr is not None and hasattr(sys.stdout, 'buffer') and hasattr(sys.stderr, 'buffer'):
+            # Re-wrap sys.stdout and sys.stderr with a UTF-8 TextIOWrapper
+            # write_through=True ensures that writes are flushed immediately to the underlying buffer,
+            # which is typical and desired behavior for console output.
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', write_through=True)
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', write_through=True)
+        else:
+            # If sys.stderr is None or buffer is not available on either, we skip re-wrapping.
+            # This environment might not support buffer-based streams or is already configured.
+            pass
     except AttributeError:
-        # This can happen if sys.stdout.buffer is not available (e.g., in some IDEs,
+        # This can happen if sys.stdout.buffer or sys.stderr.buffer is not available (e.g., in some IDEs,
         # or if stdout is already a TextIOWrapper). In such cases, the environment
         # might already handle Unicode correctly, or the output is redirected.
         pass
     except Exception as e:
         # Catch any other potential exceptions during the re-configuration
-        print(f"Warning: R.O.O.T. could not reconfigure console for UTF-8 output. Some characters might display incorrectly. Error: {e}", file=sys.stderr)
+        # Use a fallback print if sys.stderr itself is problematic (e.g., None).
+        if sys.stderr is not None:
+            print(f"Warning: R.O.O.T. could not reconfigure console for UTF-8 output. Some characters might display incorrectly. Error: {e}", file=sys.stderr)
+        else:
+            print(f"Warning: R.O.O.T. could not reconfigure console for UTF-8 output. Some characters might display incorrectly. Error: {e}")
 
 
 import core.state

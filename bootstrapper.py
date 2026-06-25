@@ -12,6 +12,7 @@ import subprocess
 import threading
 import shutil
 import webbrowser
+import time
 
 def run_bootstrapper():
     # 1. Show sleek splash screen
@@ -32,7 +33,8 @@ def run_bootstrapper():
     
     try:
         # 2. Download the absolute latest installer.py from GitHub
-        url = "https://raw.githubusercontent.com/Shubham-Masali76/Project-Root/main/installer.py"
+        url = f"https://raw.githubusercontent.com/Shubham-Masali76/Project-Root/main/installer.py?t={time.time()}"
+
         temp_installer = os.path.join(os.environ.get("TEMP", "C:\\Temp"), "live_installer.py")
         
         urllib.request.urlretrieve(url, temp_installer)
