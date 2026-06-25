@@ -1,0 +1,30 @@
+# Virtual Environments
+venv/
+env/
+.venv/
+
+# Environment Variables & Secrets
+.env
+
+# R.O.O.T. Dynamic State Files (Do not commit to GitHub!)
+memory_ltm.json
+crash_log.json
+commit_hash.txt
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller Build Files
+build/
+dist/
+*.spec
+
+# IDEs
+.vscode/
+.idea/
+
+# Local AI Models (Vosk, Ollama, etc. - DO NOT UPLOAD TO GITHUB!)
+model/
+models/
