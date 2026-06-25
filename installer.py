@@ -93,10 +93,25 @@ def start_install(api_key, create_desktop, create_startup, progress_var, status_
             if create_desktop:
                 pythonw_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pythonw.exe")
                 main_py = os.path.join(INSTALL_DIR, "main.py")
-                bat_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "Start R.O.O.T..bat")
-                bat_content = f"""@echo off\ncd /d "{INSTALL_DIR}"\nstart "" "{pythonw_exe}" "{main_py}"\n"""
-                with open(bat_path, "w") as f:
-                    f.write(bat_content)
+                shortcut_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "Start R.O.O.T..lnk")
+                
+                vbs_script = f"""
+Set oWS = WScript.CreateObject("WScript.Shell")
+sLinkFile = "{shortcut_path}"
+Set oLink = oWS.CreateShortcut(sLinkFile)
+oLink.TargetPath = "{pythonw_exe}"
+oLink.Arguments = "main.py"
+oLink.WorkingDirectory = "{INSTALL_DIR}"
+oLink.Description = "Launch R.O.O.T. Artificial Intelligence"
+oLink.Save
+"""
+                vbs_path = os.path.join(INSTALL_DIR, "create_shortcut.vbs")
+                with open(vbs_path, "w") as f:
+                    f.write(vbs_script)
+                
+                subprocess.run(["cscript.exe", "//Nologo", vbs_path], creationflags=subprocess.CREATE_NO_WINDOW)
+                if os.path.exists(vbs_path):
+                    os.remove(vbs_path)
                     
             progress_var.set(100)
             status_label.config(text="Installation Complete! Waking R.O.O.T. up...")
