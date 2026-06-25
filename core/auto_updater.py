@@ -16,8 +16,7 @@ GITHUB_REPO = "Project-Root"
 BRANCH = "main"
 # ---------------------
 
-API_URL = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/commits/{BRANCH}"
-ZIP_URL = f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}/archive/refs/heads/{BRANCH}.zip"
+API_URL = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/tags"
 LOCAL_HASH_FILE = "commit_hash.txt"
 
 def update_thread():
@@ -29,11 +28,13 @@ def update_thread():
     STATE_DICT["CURRENT_LOG"] = "AutoUpdater: Ping sent to GitHub for OTA updates..."
     print("[AutoUpdater] Checking for OTA updates...")
     try:
-        # 1. Fetch latest commit hash
+        # 1. Fetch latest tag
         req = urllib.request.Request(API_URL, headers={'User-Agent': 'ROOT-AI-Updater'})
         with urllib.request.urlopen(req, timeout=10) as response:
             data = json.loads(response.read().decode())
-            remote_hash = data['sha']
+            remote_hash = data[0]['name']
+            
+        zip_url = f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}/archive/refs/tags/{remote_hash}.zip"
             
         # 2. Check local hash
         local_hash = ""
@@ -50,7 +51,7 @@ def update_thread():
         
         # 3. Download update
         zip_path = "update.zip"
-        urllib.request.urlretrieve(ZIP_URL, zip_path)
+        urllib.request.urlretrieve(zip_url, zip_path)
         
         # 4. Extract
         extract_dir = "update_extracted"

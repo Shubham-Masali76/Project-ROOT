@@ -39,17 +39,17 @@ def start_install(api_key, create_desktop, create_startup, progress_var, status_
             urllib.request.urlretrieve(GITHUB_ZIP_URL, zip_path)
             progress_var.set(40)
             
-            # 4. Extract Source Code
-            status_label.config(text="Extracting source code...")
+            # 4. Extract Zip
+            status_label.config(text="Extracting Neural Pathways...")
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(INSTALL_DIR)
             os.remove(zip_path)
-            
-            # Move files from extracted subfolder to root install dir
+                
+            # The zip extracts into a folder like 'Project-Root-main', move contents up one level
             extracted_folder = None
-            for d in os.listdir(INSTALL_DIR):
-                full_path = os.path.join(INSTALL_DIR, d)
-                if os.path.isdir(full_path) and ("Project-Root" in d or "Project-ROOT" in d):
+            for item in os.listdir(INSTALL_DIR):
+                full_path = os.path.join(INSTALL_DIR, item)
+                if os.path.isdir(full_path) and ("Project-Root" in item or "Project-ROOT" in item):
                     extracted_folder = full_path
                     break
                     
@@ -65,6 +65,20 @@ def start_install(api_key, create_desktop, create_startup, progress_var, status_
                     shutil.move(src, INSTALL_DIR)
                 shutil.rmtree(extracted_folder, ignore_errors=True)
             progress_var.set(50)
+            
+            # 4.5 Write Initial Commit Hash so AutoUpdater skips first boot
+            status_label.config(text="Synchronizing GitHub versions...")
+            try:
+                import json
+                api_url = "https://api.github.com/repos/Shubham-Masali76/Project-Root/tags"
+                req = urllib.request.Request(api_url, headers={'User-Agent': 'ROOT-Installer'})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = json.loads(response.read().decode())
+                    remote_hash = data[0]['name']
+                with open(os.path.join(INSTALL_DIR, "commit_hash.txt"), "w") as f:
+                    f.write(remote_hash)
+            except Exception as e:
+                print(f"Hash sync failed: {e}")
             
             # 5. Build venv
             status_label.config(text="Building Python environment (venv)...")
