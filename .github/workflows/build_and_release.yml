@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # Triggers workflow only when you push a tag starting with 'v', like v3.0.0
 
+permissions:
+  contents: write # REQUIRED to allow the cloud server to upload the .exe to the Release page
+
 jobs:
   build:
     runs-on: windows-latest
