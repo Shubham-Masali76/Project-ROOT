@@ -66,7 +66,6 @@ class TriMemorySystem:
 
     def _consolidation_loop(self):
         """Background thread that continuously analyzes STM for plasticity events."""
-        client = genai.Client()
         last_stm_length = 0
         
         while True:
@@ -74,8 +73,16 @@ class TriMemorySystem:
             
             # Only consolidate if there's new data in the STM
             if len(self.stm) >= 2 and len(self.stm) != last_stm_length:
-                last_stm_length = len(self.stm)
-                self._analyze_stm_for_plasticity(client)
+                if not os.environ.get("GEMINI_API_KEY"):
+                    # Silently skip if no API key is set
+                    continue
+                
+                try:
+                    client = genai.Client()
+                    last_stm_length = len(self.stm)
+                    self._analyze_stm_for_plasticity(client)
+                except Exception as e:
+                    print(f"[Neuroplasticity] Consolidation failed to initialize client or analyze: {e}")
 
     def _analyze_stm_for_plasticity(self, client):
         """Uses LLM to detect user corrections in the STM buffer and extracts LTM rules."""

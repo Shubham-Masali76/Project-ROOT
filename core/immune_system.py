@@ -85,7 +85,13 @@ def diagnose_and_repair(exc_type, exc_value, exc_traceback):
     STATE_DICT["CURRENT_LOG"] = "Transmitting traceback to Gemini LLM... [Asking Neural Network for a code fix]"
         
     # 3. Query LLM for the Patch
-    client = genai.Client()
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("[Immune System] No GEMINI_API_KEY set. Cannot query LLM for auto-repair. Please set the environment variable.")
+        STATE_DICT["CURRENT_LOG"] = "Immune System: Repair aborted due to missing GEMINI_API_KEY."
+        return
+        
+    client = genai.Client(api_key=api_key)
     prompt = f"""
     You are the Auto-Healing Immune System of an advanced AI called R.O.O.T.
     A fatal exception occurred in the following Python file.
