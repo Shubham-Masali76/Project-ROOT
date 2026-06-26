@@ -28,3 +28,7 @@ dist/
 # Local AI Models (Vosk, Ollama, etc. - DO NOT UPLOAD TO GITHUB!)
 model/
 models/
+
+# Temp Logs & Cache
+*.log
+.voice_cache.mp3
