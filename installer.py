@@ -280,14 +280,16 @@ class InstallerApp:
             # STEP 3: Build Venv
             self.update_step(3, 1)
             subprocess.run(["python", "-m", "venv", "venv"], cwd=INSTALL_DIR, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
-            self.progress_var.set(70)
-            self.update_step(3, 2)
+            self.progress_var.set(60)
             
-            # STEP 4: Install Dependencies
-            self.update_step(4, 1)
             pip_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pip.exe")
+            # Install uv using pip
+            subprocess.run([pip_exe, "install", "uv"], cwd=INSTALL_DIR, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            
+            # Use uv to install requirements lightning fast
+            uv_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "uv.exe")
             req_file = os.path.join(INSTALL_DIR, "requirements.txt")
-            subprocess.run([pip_exe, "install", "-r", req_file], cwd=INSTALL_DIR, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.run([uv_exe, "pip", "install", "-r", req_file], cwd=INSTALL_DIR, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
             self.progress_var.set(80)
             self.update_step(4, 2)
             

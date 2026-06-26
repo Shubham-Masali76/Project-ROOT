@@ -5,6 +5,15 @@ import time
 class RobotFace:
     def __init__(self, state_dict):
         self.state_dict = state_dict
+        
+        # Force Windows to treat this as a distinct app so the taskbar shows our custom R logo
+        try:
+            import ctypes
+            myappid = 'antigravity.root.os.v3'
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except Exception:
+            pass
+            
         self.root = tk.Tk()
         self.root.title("R.O.O.T. Interface")
         self.root.overrideredirect(True)
