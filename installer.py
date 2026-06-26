@@ -325,7 +325,7 @@ class InstallerApp:
             if self.desktop_var.get():
                 pythonw_exe = os.path.join(INSTALL_DIR, "venv", "Scripts", "pythonw.exe")
                 main_py = os.path.join(INSTALL_DIR, "main.py")
-                shortcut_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "Start R.O.O.T..lnk")
+                shortcut_path = os.path.join(os.environ["USERPROFILE"], "Desktop", "ROOT.lnk")
                 
                 vbs_script = f"""
 Set oWS = WScript.CreateObject("WScript.Shell")
