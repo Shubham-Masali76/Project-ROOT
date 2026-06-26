@@ -45,13 +45,17 @@ def get_intent(text):
         return "CLIPBOARD_AGENT"
     if any(w in text_lower for w in ["remind me", "notify me", "alert me", "send a notification"]):
         return "NOTIFIER_AGENT"
+    if any(w in text_lower for w in ["setting", "brightness", "wallpaper", "background", "theme", "dark mode", "light mode", "bluetooth", "wi-fi", "wifi", "network", "set volume", "change volume"]):
+        return "SYSTEM_SETTINGS"
+    if any(w in text_lower for w in ["install", "uninstall", "download and install", "setup"]) and any(w in text_lower for w in ["app", "game", "software", "program"]) or "install" in text_lower or "uninstall" in text_lower:
+        return "PACKAGE_MANAGER"
         
     print("[System] Fast Heuristics Failed. Querying Gemini Intent Engine...")
 
     # 2. GEMINI FALLBACK (For complex phrasing)
     prompt = f"""
     Map the user's text to EXACTLY ONE of the following action categories:
-    ORGANIZE_DOWNLOADS, CLEAN_SYSTEM, OS_CONTROL, SOCIAL_AGENT, VISION_AGENT, MESSENGER, FILE_MANAGER, INFORMATION_AGENT, MEDIA_CONTROL, DIAGNOSTIC_AGENT, GUI_CONTROL, CLIPBOARD_AGENT, NOTIFIER_AGENT
+    ORGANIZE_DOWNLOADS, CLEAN_SYSTEM, OS_CONTROL, SOCIAL_AGENT, VISION_AGENT, MESSENGER, FILE_MANAGER, INFORMATION_AGENT, MEDIA_CONTROL, DIAGNOSTIC_AGENT, GUI_CONTROL, CLIPBOARD_AGENT, NOTIFIER_AGENT, SYSTEM_SETTINGS, PACKAGE_MANAGER
     
     Examples:
     "open roblox" -> OS_CONTROL
@@ -60,6 +64,10 @@ def get_intent(text):
     "send a message to mom" -> MESSENGER
     "what is the weather" -> INFORMATION_AGENT
     "pause the music" -> MEDIA_CONTROL
+    "turn off bluetooth" -> SYSTEM_SETTINGS
+    "set my wallpaper to a dog" -> SYSTEM_SETTINGS
+    "install spotify" -> PACKAGE_MANAGER
+    "uninstall valorant" -> PACKAGE_MANAGER
     
     If nothing perfectly matches, return UNKNOWN.   
     Respond with ONLY a valid JSON object containing the "intent" key.
@@ -79,7 +87,7 @@ def get_intent(text):
         data = json.loads(response.text)
         intent = data.get('intent', '').strip().upper()
         
-        valid_intents = ["ORGANIZE_DOWNLOADS", "CLEAN_SYSTEM", "OS_CONTROL", "SOCIAL_AGENT", "VISION_AGENT", "MESSENGER", "FILE_MANAGER", "INFORMATION_AGENT", "MEDIA_CONTROL", "DIAGNOSTIC_AGENT", "GUI_CONTROL", "CLIPBOARD_AGENT", "NOTIFIER_AGENT"]
+        valid_intents = ["ORGANIZE_DOWNLOADS", "CLEAN_SYSTEM", "OS_CONTROL", "SOCIAL_AGENT", "VISION_AGENT", "MESSENGER", "FILE_MANAGER", "INFORMATION_AGENT", "MEDIA_CONTROL", "DIAGNOSTIC_AGENT", "GUI_CONTROL", "CLIPBOARD_AGENT", "NOTIFIER_AGENT", "SYSTEM_SETTINGS", "PACKAGE_MANAGER"]
         for valid in valid_intents:
             if valid in intent:
                 return valid

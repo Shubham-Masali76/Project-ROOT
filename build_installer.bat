@@ -3,7 +3,7 @@ echo Installing PyInstaller...
 pip install pyinstaller
 
 echo Compiling bootstrapper.py into a single executable...
-pyinstaller --onefile --noconsole --name ROOT_Setup bootstrapper.py
+pyinstaller --onefile --noconsole --icon=icon.ico --name ROOT_Setup bootstrapper.py
 
 echo.
 echo Compilation Complete!

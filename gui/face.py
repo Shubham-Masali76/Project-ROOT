@@ -14,6 +14,13 @@ class RobotFace:
         self.bg_color = '#0a1128' # Deep Rich Navy Blue instead of black/grey
         self.root.configure(bg=self.bg_color)
         
+        try:
+            import os
+            icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icon.ico")
+            self.root.iconbitmap(icon_path)
+        except Exception:
+            pass
+        
         self.is_pinned = True
         
         # Add Drag-to-Move functionality

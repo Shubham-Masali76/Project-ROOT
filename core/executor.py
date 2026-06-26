@@ -20,6 +20,8 @@ from operators import the_hand
 from operators import secretary
 from operators import notifier
 from operators import chat_agent
+from operators import settings_controller
+from operators import app_manager
 
 def executor_worker():
     """THE HANDS: Constantly processes the execution queue and routes commands to operators."""
@@ -112,6 +114,16 @@ def executor_worker():
             
         elif "NOTIFIER_AGENT" in intent:
             res = notifier.execute(task_text)
+            speak(res)
+            
+        elif "SYSTEM_SETTINGS" in intent:
+            speak("Modifying system parameters.")
+            res = settings_controller.execute(task_text)
+            speak(res)
+            
+        elif "PACKAGE_MANAGER" in intent:
+            speak("Engaging Winget package manager.")
+            res = app_manager.execute(task_text)
             speak(res)
             
         elif intent == "UNKNOWN":

@@ -22,3 +22,6 @@ mss
 plyer
 pygetwindow
 youtube-transcript-api
+screen-brightness-control
+pycaw
+comtypes
