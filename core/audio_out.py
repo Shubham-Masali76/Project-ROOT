@@ -72,6 +72,14 @@ def tts_worker():
                 time.sleep(0.03)
                 
             pygame.mixer.music.unload()
+            
+            # Clean up the cache file immediately so it doesn't clutter the directory
+            try:
+                time.sleep(0.1) # Give Pygame a moment to fully release the file lock
+                os.remove(output_file)
+            except Exception:
+                pass
+                
             STATE_DICT["STATE"] = "IDLE"
             STATE_DICT["MOUTH_AMPLITUDE"] = 0.0
             STATE_DICT["EMOTION"] = "NEUTRAL"
