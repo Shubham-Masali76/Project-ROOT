@@ -8,6 +8,7 @@ class RobotFace:
         self.root = tk.Tk()
         self.root.title("R.O.O.T. Interface")
         self.root.overrideredirect(True)
+        self.root.after(10, self.set_appwindow) # Force taskbar icon for frameless window
         self.root.wm_attributes("-topmost", True)
         # Distinct background color so it doesn't blend into other apps
         self.bg_color = '#0a1128' # Deep Rich Navy Blue instead of black/grey
@@ -150,6 +151,20 @@ class RobotFace:
         STATE_DICT["EMOTION"] = "SAD"
         speak("Shutting down all core systems. Goodbye.")
         threading.Timer(4.0, lambda: os._exit(0)).start()
+
+    def set_appwindow(self):
+        """Forces a frameless (overrideredirect) window to appear on the Windows taskbar."""
+        try:
+            import ctypes
+            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            style = ctypes.windll.user32.GetWindowLongW(hwnd, -20) # GWL_EXSTYLE
+            style = style & ~0x00000080 # Remove WS_EX_TOOLWINDOW
+            style = style | 0x00040000  # Add WS_EX_APPWINDOW
+            ctypes.windll.user32.SetWindowLongW(hwnd, -20, style)
+            self.root.wm_withdraw()
+            self.root.wm_deiconify()
+        except Exception:
+            pass
 
     def start_move(self, event):
         self._x = event.x
