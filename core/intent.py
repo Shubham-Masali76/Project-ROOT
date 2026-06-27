@@ -75,16 +75,16 @@ def get_intent(text):
     User Text: "{text}"
     """
     try:
-        client = genai.Client()
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.0,
-            )
+        from groq import Groq
+        import os
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        chat_completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+            temperature=0.0
         )
-        data = json.loads(response.text)
+        data = json.loads(chat_completion.choices[0].message.content)
         intent = data.get('intent', '').strip().upper()
         
         valid_intents = ["ORGANIZE_DOWNLOADS", "CLEAN_SYSTEM", "OS_CONTROL", "SOCIAL_AGENT", "VISION_AGENT", "MESSENGER", "FILE_MANAGER", "INFORMATION_AGENT", "MEDIA_CONTROL", "DIAGNOSTIC_AGENT", "GUI_CONTROL", "CLIPBOARD_AGENT", "NOTIFIER_AGENT", "SYSTEM_SETTINGS", "PACKAGE_MANAGER"]

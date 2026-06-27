@@ -31,6 +31,7 @@ class InstallerApp:
         
         # Initialize variables
         self.api_key_var = tk.StringVar()
+        self.groq_key_var = tk.StringVar()
         self.desktop_var = tk.BooleanVar(value=True)
         self.startup_var = tk.BooleanVar(value=True)
         self.progress_var = tk.DoubleVar()
@@ -88,11 +89,16 @@ class InstallerApp:
         title = tk.Label(self.frame_setup, text="Configuration Setup", font=("Segoe UI", 20, "bold"), bg="#121212", fg="#00e5ff")
         title.pack(pady=(40, 10))
         
-        desc = tk.Label(self.frame_setup, text="To power the deep-learning brain, provide your Gemini API Key.", bg="#121212", fg="#b3b3b3", font=("Segoe UI", 11))
+        desc = tk.Label(self.frame_setup, text="To power the deep-learning brain, provide your API Keys.", bg="#121212", fg="#b3b3b3", font=("Segoe UI", 11))
         desc.pack(pady=10)
         
+        tk.Label(self.frame_setup, text="Gemini API Key (For Vision & Research):", bg="#121212", fg="white", font=("Segoe UI", 10)).pack()
         key_entry = tk.Entry(self.frame_setup, textvariable=self.api_key_var, width=55, show="*", font=("Segoe UI", 11), bg="#1e1e1e", fg="white", insertbackground="white", relief=tk.FLAT)
-        key_entry.pack(pady=10, ipady=8)
+        key_entry.pack(pady=5, ipady=8)
+
+        tk.Label(self.frame_setup, text="Groq API Key (For Lightning Fast Voice Chat):", bg="#121212", fg="white", font=("Segoe UI", 10)).pack()
+        groq_entry = tk.Entry(self.frame_setup, textvariable=self.groq_key_var, width=55, show="*", font=("Segoe UI", 11), bg="#1e1e1e", fg="white", insertbackground="white", relief=tk.FLAT)
+        groq_entry.pack(pady=5, ipady=8)
         
         env_path = os.path.join(INSTALL_DIR, ".env")
         if os.path.exists(env_path):
@@ -101,7 +107,8 @@ class InstallerApp:
                     for line in f:
                         if line.startswith("GEMINI_API_KEY="):
                             self.api_key_var.set(line.split("=", 1)[1].strip())
-                            break
+                        elif line.startswith("GROQ_API_KEY="):
+                            self.groq_key_var.set(line.split("=", 1)[1].strip())
             except Exception:
                 pass
 
@@ -177,14 +184,15 @@ class InstallerApp:
 
     def start_install(self):
         api_key = self.api_key_var.get().strip()
-        if not api_key:
-            messagebox.showerror("Error", "API Key is required to power the AI's brain.")
+        groq_key = self.groq_key_var.get().strip()
+        if not api_key or not groq_key:
+            messagebox.showerror("Error", "Both API Keys are required to power the hybrid AI brain.")
             return
             
         self.show_frame(self.frame_progress)
-        threading.Thread(target=self.install_thread, args=(api_key,), daemon=True).start()
+        threading.Thread(target=self.install_thread, args=(api_key, groq_key), daemon=True).start()
 
-    def install_thread(self, api_key):
+    def install_thread(self, api_key, groq_key):
         try:
             # STEP 0: Prerequisites (Python)
             self.update_step(0, 1)
@@ -231,6 +239,7 @@ class InstallerApp:
             
             with open(os.path.join(INSTALL_DIR, ".env"), "w") as f:
                 f.write(f"GEMINI_API_KEY={api_key}\n")
+                f.write(f"GROQ_API_KEY={groq_key}\n")
             self.progress_var.set(20)
             
             zip_path = os.path.join(INSTALL_DIR, "source.zip")
@@ -297,9 +306,17 @@ class InstallerApp:
             self.update_step(5, 1)
             model_dir = os.path.join(INSTALL_DIR, "model")
             if not os.path.exists(model_dir):
-                vosk_url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
                 vosk_zip = os.path.join(INSTALL_DIR, "vosk_model.zip")
-                urllib.request.urlretrieve(vosk_url, vosk_zip)
+                try:
+                    # Fast GitHub Mirror
+                    url = "https://github.com/rhasspy/rhasspy-asr-vosk-hermes/releases/download/v0.1.0/vosk-model-small-en-us-0.15.zip"
+                    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                    with urllib.request.urlopen(req) as response, open(vosk_zip, 'wb') as out_file:
+                        out_file.write(response.read())
+                except Exception:
+                    # Fallback to slow mirror
+                    vosk_url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
+                    urllib.request.urlretrieve(vosk_url, vosk_zip)
                 
                 with zipfile.ZipFile(vosk_zip, 'r') as zip_ref:
                     zip_ref.extractall(INSTALL_DIR)

@@ -1,17 +1,16 @@
 import os
 import json
-from google import genai
-from google.genai import types
+from groq import Groq
 
 def execute(command_text, state_dict):
     print("[Chat Protocol] Processing conversational response...")
     
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         state_dict["EMOTION"] = "SAD"
-        return "I am offline. Please set your GEMINI_API_KEY so we can talk."
+        return "I am offline. Please set your GROQ_API_KEY so we can talk."
         
-    client = genai.Client(api_key=api_key)
+    client = Groq(api_key=api_key)
     
     prompt = f"""
     You are R.O.O.T., an AI best friend and OS Orchestrator. 
@@ -27,16 +26,14 @@ def execute(command_text, state_dict):
     """
     
     try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.7
-            )
+        chat_completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+            temperature=0.7
         )
         
-        data = json.loads(response.text)
+        data = json.loads(chat_completion.choices[0].message.content)
         voice_response = data.get("response", "I hear you!")
         emotion = data.get("emotion", "NEUTRAL").upper()
         

@@ -1,6 +1,6 @@
 SpeechRecognition
 pyttsx3
-ollama
+groq
 google-genai
 PyAudio
 winshell
